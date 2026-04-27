@@ -1,0 +1,23 @@
+# Qt Creator / user-specific files
+.qtcreator/
+*.pro.user
+*.user
+*.user.*
+
+# Build directories
+build/
+debug/
+release/
+
+# qmake generated files
+.qmake.stash
+Makefile
+Makefile.*
+
+# Compiled object files
+*.o
+*.obj
+
+# Executables and libraries
+*.exe
+*.dll
