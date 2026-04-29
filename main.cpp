@@ -1,7 +1,6 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QString>
-#include <QFileInfo>
 #include <QThread>
 
 #include "FileState.h"
@@ -20,12 +19,10 @@ int main(int argc, char *argv[])
     out << "Enter file path: " << Qt::endl;
 
     QString filePath = in.readLine();
-    QFileInfo oldFileInfo(filePath);
 
     FileState oldState;
     oldState.path = filePath;
-    oldState.exists = oldFileInfo.exists();
-    oldState.size = oldFileInfo.size();
+    oldState.update();
 
     out << "filePath: " << filePath << Qt::endl;
     out << "Old state:" << Qt::endl;
@@ -49,12 +46,10 @@ int main(int argc, char *argv[])
 
     while (true){
         QThread::msleep(100);
-        QFileInfo newFileInfo(filePath);
 
         FileState newState;
         newState.path = filePath;
-        newState.exists = newFileInfo.exists();
-        newState.size = newFileInfo.size();
+        newState.update();
 
         if (oldState.exists == false && newState.exists == true){
             out << "File appeared" << Qt::endl;

@@ -7,6 +7,8 @@
 class FileState
 {
 public:
+    void update();
+
     QString path;
     bool exists;
     qint64 size;
