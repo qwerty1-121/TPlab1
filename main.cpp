@@ -2,6 +2,7 @@
 #include <QTextStream>
 #include <QString>
 #include <QFileInfo>
+#include <QThread>
 
 int main(int argc, char *argv[])
 {
@@ -39,45 +40,28 @@ int main(int argc, char *argv[])
         out << "File does not exist" << Qt::endl;
     }
 
-    out << "Change the file and press Enter..." << Qt::endl;
-    in.readLine();
-    QFileInfo newFileInfo(filePath);
+    out << "Watching file. Press Ctrl+C to stop." << Qt::endl;
 
-    bool newExists = newFileInfo.exists();
-    qint64 newSize = newFileInfo.size();
+    while (true){
+        QThread::msleep(100);
+        QFileInfo newFileInfo(filePath);
+        bool newExists = newFileInfo.exists();
+        qint64 newSize = newFileInfo.size();
 
-    out << "New state:" << Qt::endl;
-
-    if (newExists) {
-        out << "File exists" << Qt::endl;
-
-        if (newSize == 0) {
-            out << "File is empty" << Qt::endl;
+        if (oldExists == false && newExists == true){
+            out << "File appeared" << Qt::endl;
         }
-        else {
-            out << "File is not empty" << Qt::endl;
-            out << "Size: " << newSize << " bytes" << Qt::endl;
+
+        else if (oldExists == true && newExists == false){
+            out << "File disappeared" << Qt::endl;
         }
-    }
-    else {
-        out << "File does not exist" << Qt::endl;
-    }
-
-    out << "Event:" << Qt::endl;
-
-    if (oldExists == false && newExists == true) {
-        out << "File appeared" << Qt::endl;
-    }
-    else if (oldExists == true && newExists == false) {
-        out << "File disappeared" << Qt::endl;
-    }
-    else if (oldExists == true && newExists == true && oldSize != newSize) {
-        out << "File size changed" << Qt::endl;
-        out << "Old size: " << oldSize << " bytes" << Qt::endl;
-        out << "New size: " << newSize << " bytes" << Qt::endl;
-    }
-    else {
-        out << "No changes" << Qt::endl;
+        else if (oldExists == true && newExists == true && oldSize != newSize){
+            out << "File size changed" << Qt::endl;
+            out << "Old size: " << oldSize << " bytes" << Qt::endl;
+            out << "New size: " << newSize << " bytes" << Qt::endl;
+        }
+        oldExists = newExists;
+        oldSize = newSize;
     }
     return 0;
 }
