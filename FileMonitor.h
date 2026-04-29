@@ -11,9 +11,11 @@ public:
     FileMonitor(QString filePath);
 
     FileState readState();
+    QString check();
 
 private:
     QString m_filePath;
+    FileState m_oldState;
 };
 
 #endif // FILEMONITOR_H
