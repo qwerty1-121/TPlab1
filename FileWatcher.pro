@@ -8,6 +8,8 @@ TEMPLATE = app
 TARGET = FileWatcher
 
 SOURCES += main.cpp \
-           FileState.cpp
+           FileState.cpp \
+           FileMonitor.cpp
 
-HEADERS += FileState.h
+HEADERS += FileState.h \
+           FileMonitor.h

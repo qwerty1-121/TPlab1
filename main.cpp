@@ -3,7 +3,7 @@
 #include <QString>
 #include <QThread>
 
-#include "FileState.h"
+#include "FileMonitor.h"
 
 int main(int argc, char *argv[])
 {
@@ -20,9 +20,9 @@ int main(int argc, char *argv[])
 
     QString filePath = in.readLine();
 
-    FileState oldState;
-    oldState.path = filePath;
-    oldState.update();
+    FileMonitor monitor(filePath);
+
+    FileState oldState = monitor.readState();
 
     out << "filePath: " << filePath << Qt::endl;
     out << "Old state:" << Qt::endl;
@@ -47,9 +47,7 @@ int main(int argc, char *argv[])
     while (true){
         QThread::msleep(100);
 
-        FileState newState;
-        newState.path = filePath;
-        newState.update();
+        FileState newState = monitor.readState();
 
         if (oldState.exists == false && newState.exists == true){
             out << "File appeared" << Qt::endl;
