@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <QThread>
 
+#include "FileState.h"
+
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
@@ -16,23 +18,26 @@ int main(int argc, char *argv[])
     out << "Project setup step" << Qt::endl;
 
     out << "Enter file path: " << Qt::endl;
+
     QString filePath = in.readLine();
     QFileInfo oldFileInfo(filePath);
 
-    bool oldExists = oldFileInfo.exists();
-    qint64 oldSize = oldFileInfo.size();
+    FileState oldState;
+    oldState.path = filePath;
+    oldState.exists = oldFileInfo.exists();
+    oldState.size = oldFileInfo.size();
 
     out << "filePath: " << filePath << Qt::endl;
     out << "Old state:" << Qt::endl;
 
-    if (oldExists) {
+    if (oldState.exists) {
         out << "File exists" << Qt::endl;
-        if (oldSize == 0) {
+        if (oldState.size == 0) {
             out << "File is empty" << Qt::endl;
         }
         else {
             out << "File is not empty" << Qt::endl;
-            out << "Size: " << oldSize << " bytes" << Qt::endl;
+            out << "Size: " << oldState.size << " bytes" << Qt::endl;
         }
            
     }
@@ -45,23 +50,25 @@ int main(int argc, char *argv[])
     while (true){
         QThread::msleep(100);
         QFileInfo newFileInfo(filePath);
-        bool newExists = newFileInfo.exists();
-        qint64 newSize = newFileInfo.size();
 
-        if (oldExists == false && newExists == true){
+        FileState newState;
+        newState.path = filePath;
+        newState.exists = newFileInfo.exists();
+        newState.size = newFileInfo.size();
+
+        if (oldState.exists == false && newState.exists == true){
             out << "File appeared" << Qt::endl;
         }
 
-        else if (oldExists == true && newExists == false){
+        else if (oldState.exists == true && newState.exists == false){
             out << "File disappeared" << Qt::endl;
         }
-        else if (oldExists == true && newExists == true && oldSize != newSize){
+        else if (oldState.exists == true && newState.exists == true && oldState.size != newState.size){
             out << "File size changed" << Qt::endl;
-            out << "Old size: " << oldSize << " bytes" << Qt::endl;
-            out << "New size: " << newSize << " bytes" << Qt::endl;
+            out << "Old size: " << oldState.size << " bytes" << Qt::endl;
+            out << "New size: " << newState.size << " bytes" << Qt::endl;
         }
-        oldExists = newExists;
-        oldSize = newSize;
+        oldState = newState;
     }
     return 0;
 }

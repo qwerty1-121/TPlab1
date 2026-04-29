@@ -7,4 +7,7 @@ CONFIG -= app_bundle
 TEMPLATE = app
 TARGET = FileWatcher
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+           FileState.cpp
+
+HEADERS += FileState.h
