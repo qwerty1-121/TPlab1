@@ -3,7 +3,9 @@
 #include <QString>
 #include <QThread>
 
+#include "FileState.h"
 #include "FileMonitor.h"
+#include "ConsoleNotifier.h"
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +23,15 @@ int main(int argc, char *argv[])
     QString filePath = in.readLine();
 
     FileMonitor monitor(filePath);
+    ConsoleNotifier notifier;
+
+    QObject::connect(
+        &monitor,
+        &FileMonitor::fileChanged,
+        &notifier,
+        &ConsoleNotifier::printMessage
+    );
+
     FileState currentState = monitor.readState();
 
     out << "filePath: " << filePath << Qt::endl;
@@ -47,12 +58,7 @@ int main(int argc, char *argv[])
     {
         QThread::msleep(100);
 
-        QString message = monitor.check();
-
-        if (!message.isEmpty())
-        {
-            out << message << Qt::endl;
-        }
+        monitor.check();
     }
 
     return 0;

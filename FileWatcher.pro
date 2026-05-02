@@ -9,7 +9,9 @@ TARGET = FileWatcher
 
 SOURCES += main.cpp \
            FileState.cpp \
-           FileMonitor.cpp
+           FileMonitor.cpp \
+           ConsoleNotifier.cpp
 
 HEADERS += FileState.h \
-           FileMonitor.h
+           FileMonitor.h \
+           ConsoleNotifier.h

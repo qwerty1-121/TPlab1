@@ -16,7 +16,7 @@ FileState FileMonitor::readState()
     return state;
 }
 
-QString FileMonitor::check()
+void FileMonitor::check()
 {
     FileState newState = readState();
 
@@ -41,5 +41,8 @@ QString FileMonitor::check()
 
     m_oldState = newState;
 
-    return message;
+    if (!message.isEmpty())
+    {
+        emit fileChanged(message);
+    }
 }
