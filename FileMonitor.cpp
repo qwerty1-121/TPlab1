@@ -1,16 +1,20 @@
 #include "FileMonitor.h"
 
-FileMonitor::FileMonitor(QString filePath)
+FileMonitor::FileMonitor()
 {
-    m_filePath = filePath;
-    m_oldState = readState();
 }
 
-FileState FileMonitor::readState()
+void FileMonitor::addFile(QString filePath)
+{
+    FileState state = readState(filePath);
+    m_oldStates.append(state);
+}
+
+FileState FileMonitor::readState(QString filePath)
 {
     FileState state;
 
-    state.path = m_filePath;
+    state.path = filePath;
     state.update();
 
     return state;
@@ -18,31 +22,37 @@ FileState FileMonitor::readState()
 
 void FileMonitor::check()
 {
-    FileState newState = readState();
-
-    QString message;
-
-    if (m_oldState.exists == false && newState.exists == true)
+    for (int i = 0; i < m_oldStates.size(); ++i)
     {
-        message = "File appeared";
-    }
-    else if (m_oldState.exists == true && newState.exists == false)
-    {
-        message = "File disappeared";
-    }
-    else if (m_oldState.exists == true && newState.exists == true && m_oldState.size != newState.size)
-    {
-        message = "File size changed. Old size: "
-                + QString::number(m_oldState.size)
-                + " bytes. New size: "
-                + QString::number(newState.size)
-                + " bytes.";
-    }
+        FileState oldState = m_oldStates[i];
+        FileState newState = readState(oldState.path);
 
-    m_oldState = newState;
+        QString message;
 
-    if (!message.isEmpty())
-    {
-        emit fileChanged(message);
+        if (oldState.exists == false && newState.exists == true)
+        {
+            message = "File appeared: " + newState.path;
+        }
+        else if (oldState.exists == true && newState.exists == false)
+        {
+            message = "File disappeared: " + oldState.path;
+        }
+        else if (oldState.exists == true && newState.exists == true && oldState.size != newState.size)
+        {
+            message = "File size changed: "
+                    + newState.path
+                    + ". Old size: "
+                    + QString::number(oldState.size)
+                    + " bytes. New size: "
+                    + QString::number(newState.size)
+                    + " bytes.";
+        }
+
+        m_oldStates[i] = newState;
+
+        if (!message.isEmpty())
+        {
+            emit fileChanged(message);
+        }
     }
 }

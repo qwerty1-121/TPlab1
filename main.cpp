@@ -18,11 +18,7 @@ int main(int argc, char *argv[])
     out << "Qt console application" << Qt::endl;
     out << "Project setup step" << Qt::endl;
 
-    out << "Enter file path: " << Qt::endl;
-
-    QString filePath = in.readLine();
-
-    FileMonitor monitor(filePath);
+    FileMonitor monitor;
     ConsoleNotifier notifier;
 
     QObject::connect(
@@ -32,27 +28,57 @@ int main(int argc, char *argv[])
         &ConsoleNotifier::printMessage
     );
 
-    FileState currentState = monitor.readState();
+    int fileCount = 0;
 
-    out << "filePath: " << filePath << Qt::endl;
-    out << "Old state:" << Qt::endl;
+    out << "Enter file paths." << Qt::endl;
+    out << "Enter empty line to start watching." << Qt::endl;
 
-    if (currentState.exists) {
-        out << "File exists" << Qt::endl;
+    while (true)
+    {
+        out << "Enter file path: " << Qt::endl;
 
-        if (currentState.size == 0) {
-            out << "File is empty" << Qt::endl;
+        QString filePath = in.readLine();
+
+        if (filePath.isEmpty())
+        {
+            break;
         }
-        else {
-            out << "File is not empty" << Qt::endl;
-            out << "Size: " << currentState.size << " bytes" << Qt::endl;
+
+        monitor.addFile(filePath);
+        ++fileCount;
+
+        FileState currentState = monitor.readState(filePath);
+
+        out << "filePath: " << filePath << Qt::endl;
+        out << "Initial state:" << Qt::endl;
+
+        if (currentState.exists)
+        {
+            out << "File exists" << Qt::endl;
+
+            if (currentState.size == 0)
+            {
+                out << "File is empty" << Qt::endl;
+            }
+            else
+            {
+                out << "File is not empty" << Qt::endl;
+                out << "Size: " << currentState.size << " bytes" << Qt::endl;
+            }
+        }
+        else
+        {
+            out << "File does not exist" << Qt::endl;
         }
     }
-    else {
-        out << "File does not exist" << Qt::endl;
+
+    if (fileCount == 0)
+    {
+        out << "No files to watch." << Qt::endl;
+        return 0;
     }
 
-    out << "Watching file. Press Ctrl+C to stop." << Qt::endl;
+    out << "Watching files. Press Ctrl+C to stop." << Qt::endl;
 
     while (true)
     {

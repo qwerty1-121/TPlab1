@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QVector>
 
 #include "FileState.h"
 
@@ -11,17 +12,17 @@ class FileMonitor : public QObject
     Q_OBJECT
 
 public:
-    FileMonitor(QString filePath);
+    FileMonitor();
 
-    FileState readState();
+    void addFile(QString filePath);
+    FileState readState(QString filePath);
     void check();
 
 signals:
     void fileChanged(QString message);
 
 private:
-    QString m_filePath;
-    FileState m_oldState;
+    QVector<FileState> m_oldStates;
 };
 
 #endif // FILEMONITOR_H
