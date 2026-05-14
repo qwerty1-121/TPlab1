@@ -6,12 +6,14 @@ FileMonitor::FileMonitor()
 
 void FileMonitor::addFile(QString filePath)
 {
+    // Добавляем начальное состояние файла в список наблюдения
     FileState state = readState(filePath);
     m_oldStates.append(state);
 }
 
 FileState FileMonitor::readState(QString filePath)
 {
+    // Формируем текущее состояние файла
     FileState state;
 
     state.path = filePath;
@@ -22,6 +24,7 @@ FileState FileMonitor::readState(QString filePath)
 
 void FileMonitor::check()
 {
+    // Сравниваем сохранённое состояние каждого файла с текущим
     for (int i = 0; i < m_oldStates.size(); ++i)
     {
         FileState oldState = m_oldStates[i];
@@ -48,8 +51,10 @@ void FileMonitor::check()
                     + " bytes.";
         }
 
+        // Сохраняем новое состояние для следующей проверки
         m_oldStates[i] = newState;
 
+        // Если изменение найдено, отправляем сигнал
         if (!message.isEmpty())
         {
             emit fileChanged(message);

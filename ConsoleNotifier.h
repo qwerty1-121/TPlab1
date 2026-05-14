@@ -15,4 +15,4 @@ public slots:
     void printMessage(QString message);
 };
 
-#endif // CONSOLENOTIFIER_H
+#endif 

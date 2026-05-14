@@ -14,4 +14,4 @@ public:
     qint64 size;
 };
 
-#endif // FILESTATE_H
+#endif 
