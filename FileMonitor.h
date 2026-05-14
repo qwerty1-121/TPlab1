@@ -25,4 +25,4 @@ private:
     QVector<FileState> m_oldStates;
 };
 
-#endif // FILEMONITOR_H
+#endif 

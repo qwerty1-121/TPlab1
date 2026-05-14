@@ -9,8 +9,10 @@
 
 int main(int argc, char *argv[])
 {
+    // Инициализация консольного Qt-приложения
     QCoreApplication app(argc, argv);
 
+    // Потоки для ввода и вывода в консоль
     QTextStream in(stdin);
     QTextStream out(stdout);
 
@@ -18,9 +20,11 @@ int main(int argc, char *argv[])
     out << "Qt console application" << Qt::endl;
     out << "Project setup step" << Qt::endl;
 
+    // monitor следит за файлами, notifier выводит сообщения
     FileMonitor monitor;
     ConsoleNotifier notifier;
 
+    // Связываем сигнал изменения файла со слотом вывода сообщения
     QObject::connect(
         &monitor,
         &FileMonitor::fileChanged,
@@ -33,20 +37,24 @@ int main(int argc, char *argv[])
     out << "Enter file paths." << Qt::endl;
     out << "Enter empty line to start watching." << Qt::endl;
 
+    // Ввод путей к файлам до пустой строки
     while (true)
     {
         out << "Enter file path: " << Qt::endl;
 
         QString filePath = in.readLine();
 
+        // Пустая строка завершает ввод файлов
         if (filePath.isEmpty())
         {
             break;
         }
 
+        // Добавляем файл в наблюдение
         monitor.addFile(filePath);
         ++fileCount;
 
+        // Считываем и выводим начальное состояние файла
         FileState currentState = monitor.readState(filePath);
 
         out << "filePath: " << filePath << Qt::endl;
@@ -72,6 +80,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    // Если пользователь не ввёл ни одного файла, завершаем программу
     if (fileCount == 0)
     {
         out << "No files to watch." << Qt::endl;
@@ -80,10 +89,13 @@ int main(int argc, char *argv[])
 
     out << "Watching files. Press Ctrl+C to stop." << Qt::endl;
 
+    // Бесконечный цикл проверки файлов
     while (true)
     {
+        // Пауза между проверками — 100 мс
         QThread::msleep(100);
 
+        // Проверка изменений файлов
         monitor.check();
     }
 
