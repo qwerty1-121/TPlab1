@@ -1,7 +1,10 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QString>
-#include <QThread>
+#include <QTimer>
+#include <QMetaObject>
+
+#include <thread>
 
 #include "FileState.h"
 #include "FileMonitor.h"
@@ -9,22 +12,17 @@
 
 int main(int argc, char *argv[])
 {
-    // Инициализация консольного Qt-приложения
     QCoreApplication app(argc, argv);
 
-    // Потоки для ввода и вывода в консоль
     QTextStream in(stdin);
     QTextStream out(stdout);
 
     out << "Lab_1 File Watcher started" << Qt::endl;
     out << "Qt console application" << Qt::endl;
-    out << "Project setup step" << Qt::endl;
 
-    // monitor следит за файлами, notifier выводит сообщения
     FileMonitor monitor;
     ConsoleNotifier notifier;
 
-    // Связываем сигнал изменения файла со слотом вывода сообщения
     QObject::connect(
         &monitor,
         &FileMonitor::fileChanged,
@@ -37,24 +35,20 @@ int main(int argc, char *argv[])
     out << "Enter file paths." << Qt::endl;
     out << "Enter empty line to start watching." << Qt::endl;
 
-    // Ввод путей к файлам до пустой строки
     while (true)
     {
         out << "Enter file path: " << Qt::endl;
 
-        QString filePath = in.readLine();
+        QString filePath = in.readLine().trimmed();
 
-        // Пустая строка завершает ввод файлов
         if (filePath.isEmpty())
         {
             break;
         }
 
-        // Добавляем файл в наблюдение
         monitor.addFile(filePath);
         ++fileCount;
 
-        // Считываем и выводим начальное состояние файла
         FileState currentState = monitor.readState(filePath);
 
         out << "filePath: " << filePath << Qt::endl;
@@ -80,24 +74,55 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Если пользователь не ввёл ни одного файла, завершаем программу
     if (fileCount == 0)
     {
         out << "No files to watch." << Qt::endl;
         return 0;
     }
 
-    out << "Watching files. Press Ctrl+C to stop." << Qt::endl;
+    out << "Watching files..." << Qt::endl;
+    out << "Type exit and press Enter to stop." << Qt::endl;
 
-    // Бесконечный цикл проверки файлов
-    while (true)
+    QTimer timer;
+
+    QObject::connect(
+        &timer,
+        &QTimer::timeout,
+        &monitor,
+        &FileMonitor::check
+    );
+
+    timer.start(100);
+
+    std::thread inputThread([&app]()
     {
-        // Пауза между проверками — 100 мс
-        QThread::msleep(100);
+        QTextStream input(stdin);
 
-        // Проверка изменений файлов
-        monitor.check();
+        while (true)
+        {
+            QString command = input.readLine().trimmed().toLower();
+
+            if (command == "exit" || command == "quit" || command == "q")
+            {
+                QMetaObject::invokeMethod(
+                    &app,
+                    "quit",
+                    Qt::QueuedConnection
+                );
+
+                break;
+            }
+        }
+    });
+
+    int result = app.exec();
+
+    if (inputThread.joinable())
+    {
+        inputThread.join();
     }
 
-    return 0;
+    out << "Program finished correctly." << Qt::endl;
+
+    return result;
 }
