@@ -16,6 +16,8 @@ public:
 
     void addFile(QString filePath);
     FileState readState(QString filePath);
+
+public slots:
     void check();
 
 signals:
@@ -25,4 +27,4 @@ private:
     QVector<FileState> m_oldStates;
 };
 
-#endif 
+#endif
