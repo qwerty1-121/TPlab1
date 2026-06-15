@@ -10,6 +10,27 @@
 #include "FileMonitor.h"
 #include "ConsoleNotifier.h"
 
+void waitForExitCommand(QCoreApplication *app)
+{
+    QTextStream input(stdin);
+
+    while (true)
+    {
+        QString command = input.readLine().trimmed().toLower();
+
+        if (command == "exit" || command == "quit" || command == "q")
+        {
+            QMetaObject::invokeMethod(
+                app,
+                "quit",
+                Qt::QueuedConnection
+            );
+
+            break;
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
@@ -57,6 +78,7 @@ int main(int argc, char *argv[])
         if (currentState.exists)
         {
             out << "File exists" << Qt::endl;
+            out << "Size: " << currentState.size << " bytes" << Qt::endl;
 
             if (currentState.size == 0)
             {
@@ -65,7 +87,6 @@ int main(int argc, char *argv[])
             else
             {
                 out << "File is not empty" << Qt::endl;
-                out << "Size: " << currentState.size << " bytes" << Qt::endl;
             }
         }
         else
@@ -81,7 +102,7 @@ int main(int argc, char *argv[])
     }
 
     out << "Watching files..." << Qt::endl;
-    out << "Type exit and press Enter to stop." << Qt::endl;
+    out << "Type exit, quit or q and press Enter to stop." << Qt::endl;
 
     QTimer timer;
 
@@ -94,26 +115,7 @@ int main(int argc, char *argv[])
 
     timer.start(100);
 
-    std::thread inputThread([&app]()
-    {
-        QTextStream input(stdin);
-
-        while (true)
-        {
-            QString command = input.readLine().trimmed().toLower();
-
-            if (command == "exit" || command == "quit" || command == "q")
-            {
-                QMetaObject::invokeMethod(
-                    &app,
-                    "quit",
-                    Qt::QueuedConnection
-                );
-
-                break;
-            }
-        }
-    });
+    std::thread inputThread(waitForExitCommand, &app);
 
     int result = app.exec();
 
